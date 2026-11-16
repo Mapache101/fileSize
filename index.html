@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ByteQuest: IGCSE Data Representation Master</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .pixel-card { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 h-full flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header / Navigation Bar -->
+    <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-500/30 flex items-center justify-center">
+                    <i class="fa-solid fa-hard-drive text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">ByteQuest</h1>
+                    <p class="text-xs text-slate-400">IGCSE Data Representation Trainer</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <!-- Mode Switcher Tabs -->
+                <div class="bg-slate-900/90 p-1 rounded-xl border border-slate-700 flex space-x-1 text-xs font-medium">
+                    <button id="nav-arcade" onclick="switchMode('arcade')" class="px-3 py-1.5 rounded-lg transition-all bg-indigo-600 text-white shadow">
+                        <i class="fa-solid fa-gamepad mr-1"></i> Arcade Challenge
+                    </button>
+                    <button id="nav-photo" onclick="switchMode('photo')" class="px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-camera mr-1"></i> Photo & Storage Lab
+                    </button>
+                    <button id="nav-cheat" onclick="switchMode('cheat')" class="px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-book mr-1"></i> IGCSE Cheat Sheet
+                    </button>
+                </div>
+
+                <!-- Global Streak & Score -->
+                <div class="hidden sm:flex items-center space-x-3 bg-slate-900/60 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs font-mono">
+                    <span class="text-amber-400"><i class="fa-solid fa-fire mr-1"></i>Streak: <strong id="global-streak">0</strong></span>
+                    <span class="text-slate-500">|</span>
+                    <span class="text-emerald-400"><i class="fa-solid fa-star mr-1"></i>Score: <strong id="global-score">0</strong></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 overflow-y-auto">
+
+        <!-- ==================== MODE 1: ARCADE CHALLENGE ==================== -->
+        <section id="mode-arcade" class="space-y-6 max-w-3xl mx-auto">
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-6 pixel-card relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <!-- Quiz Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <span id="arcade-difficulty" class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Level 1: Decimal vs Binary Units</span>
+                    <div class="text-sm text-slate-400 font-mono">Question <span id="arcade-qnum">1</span> of 10</div>
+                </div>
+
+                <!-- Question Prompt -->
+                <div class="mb-8">
+                    <div id="arcade-prompt-category" class="text-xs uppercase tracking-widest text-purple-400 font-semibold mb-2">Unit Conversion</div>
+                    <h2 id="arcade-question-text" class="text-xl sm:text-2xl font-bold text-white leading-snug">
+                        Loading challenge...
+                    </h2>
+                </div>
+
+                <!-- Options / Input Area -->
+                <div id="arcade-options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <!-- Dynamic option buttons injected here -->
+                </div>
+
+                <div id="arcade-input-container" class="hidden space-y-4 mb-6">
+                    <div class="flex gap-2">
+                        <input type="number" id="arcade-numeric-input" placeholder="Enter number..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono focus:outline-none focus:border-indigo-500">
+                        <button onclick="submitNumericAnswer()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/30">Submit</button>
+                    </div>
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="arcade-feedback-box" class="hidden p-4 rounded-xl border transition-all mb-4">
+                    <div class="flex items-start space-x-3">
+                        <div id="arcade-feedback-icon" class="text-xl pt-0.5"></div>
+                        <div class="flex-1">
+                            <h4 id="arcade-feedback-title" class="font-bold text-sm"></h4>
+                            <p id="arcade-feedback-text" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Button -->
+                <div class="flex justify-end">
+                    <button id="arcade-next-btn" onclick="nextArcadeQuestion()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-600/30">
+                        Next Question <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Arcade Completion Modal / Card -->
+            <div id="arcade-complete-card" class="hidden bg-slate-800/90 border border-slate-700 rounded-2xl p-8 text-center space-y-4">
+                <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto text-3xl border border-emerald-500/30 shadow-lg">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white">Challenge Completed!</h3>
+                <p id="arcade-final-score-text" class="text-slate-300">You scored 0 out of 10 correct.</p>
+                <div class="pt-4 flex justify-center gap-3">
+                    <button onclick="startArcadeMode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/30">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Play Again
+                    </button>
+                    <button onclick="switchMode('photo')" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-xl transition-all">
+                        <i class="fa-solid fa-camera mr-2"></i> Try Photo & Storage Lab
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== MODE 2: PHOTO & STORAGE LAB (IGCSE Core Exercise) ==================== -->
+        <section id="mode-photo" class="hidden space-y-6 max-w-4xl mx-auto">
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-6 pixel-card">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-700/60 pb-4">
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-indigo-400 font-semibold">IGCSE Exam Style Lab</span>
+                        <h2 class="text-xl font-bold text-white mt-0.5"><i class="fa-solid fa-image text-purple-400 mr-2"></i>Photograph & Memory Stick Calculator</h2>
+                    </div>
+                    <button onclick="generateNewPhotoProblem()" class="bg-indigo-600/20 border border-indigo-500/40 hover:bg-indigo-600/30 text-indigo-300 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all">
+                        <i class="fa-solid fa-shuffle mr-1"></i> New Random Scenario
+                    </button>
+                </div>
+
+                <!-- Problem Statement Scenario Box -->
+                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 mb-6">
+                    <h3 class="text-sm font-semibold text-slate-400 mb-2 uppercase tracking-wider">Exam Scenario:</h3>
+                    <p id="photo-scenario-text" class="text-base sm:text-lg text-slate-200 leading-relaxed font-medium">
+                        A photograph is <span id="p-width" class="text-indigo-400 font-mono">1024</span> × <span id="p-height" class="text-indigo-400 font-mono">1080</span> pixels and uses a colour depth of <span id="p-depth" class="text-indigo-400 font-mono">32</span> bits. How many photographs of this size would fit onto a memory stick of <span id="p-stick" class="text-indigo-400 font-mono">64</span> GiB?
+                    </p>
+                </div>
+
+                <!-- Step-by-Step Interactive Form -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-300"><i class="fa-solid fa-list-ol text-amber-400 mr-2"></i>Step-by-Step Solution Breakdown:</h3>
+
+                    <!-- Step 1 -->
+                    <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 transition-all">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">Step 1</span>
+                                <span class="text-sm text-slate-300 ml-2">Total Pixels (Width × Height)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="step1-input" placeholder="e.g. 1105920" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white font-mono w-40 focus:outline-none focus:border-indigo-500">
+                                <button onclick="checkStep(1)" class="bg-slate-700 hover:bg-slate-600 text-xs font-semibold px-3.5 py-2 rounded-lg text-white">Check</button>
+                            </div>
+                        </div>
+                        <p id="step1-feedback" class="text-xs mt-2 hidden"></p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 transition-all">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">Step 2</span>
+                                <span class="text-sm text-slate-300 ml-2">File Size in Bytes (Pixels × Colour Depth ÷ 8)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="step2-input" placeholder="e.g. 4423680" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white font-mono w-40 focus:outline-none focus:border-indigo-500">
+                                <button onclick="checkStep(2)" class="bg-slate-700 hover:bg-slate-600 text-xs font-semibold px-3.5 py-2 rounded-lg text-white">Check</button>
+                            </div>
+                        </div>
+                        <p id="step2-feedback" class="text-xs mt-2 hidden"></p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 transition-all">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">Step 3</span>
+                                <span class="text-sm text-slate-300 ml-2">Memory Stick Capacity in Bytes (<span id="stick-unit-label">64 GiB</span> = 64 × 1024³)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="step3-input" placeholder="Total bytes..." class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white font-mono w-48 focus:outline-none focus:border-indigo-500">
+                                <button onclick="checkStep(3)" class="bg-slate-700 hover:bg-slate-600 text-xs font-semibold px-3.5 py-2 rounded-lg text-white">Check</button>
+                            </div>
+                        </div>
+                        <p id="step3-feedback" class="text-xs mt-2 hidden"></p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="bg-slate-900/60 border border-slate-700/80 rounded-xl p-4 transition-all">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-md border border-indigo-500/20">Step 4</span>
+                                <span class="text-sm text-slate-300 ml-2">Final Answer: How many photos fit? (Round down)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="step4-input" placeholder="Number of photos" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white font-mono w-40 focus:outline-none focus:border-indigo-500">
+                                <button onclick="checkStep(4)" class="bg-slate-700 hover:bg-slate-600 text-xs font-semibold px-3.5 py-2 rounded-lg text-white">Check Final</button>
+                            </div>
+                        </div>
+                        <p id="step4-feedback" class="text-xs mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Reveal All Solution Button -->
+                <div class="mt-6 pt-4 border-t border-slate-700/60 flex justify-between items-center">
+                    <button onclick="revealPhotoSolution()" class="text-xs text-slate-400 hover:text-indigo-400 underline transition-all">
+                        <i class="fa-solid fa-lightbulb mr-1"></i> Show Complete Worked Solution
+                    </button>
+                    <div id="photo-success-badge" class="hidden text-emerald-400 font-semibold text-sm flex items-center">
+                        <i class="fa-solid fa-circle-check mr-1.5"></i> All steps solved correctly! Great job!
+                    </div>
+                </div>
+
+                <!-- Worked Solution Panel -->
+                <div id="photo-worked-solution" class="hidden mt-4 bg-slate-900 border border-indigo-500/30 rounded-xl p-5 space-y-3 text-xs sm:text-sm text-slate-300">
+                    <h4 class="font-bold text-indigo-300 text-base mb-2"><i class="fa-solid fa-graduation-cap mr-2"></i>Step-by-Step Worked Solution:</h4>
+                    <div id="photo-solution-steps-content" class="space-y-2 font-mono text-xs"></div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ==================== MODE 3: IGCSE CHEAT SHEET & UNIT GUIDE ==================== -->
+        <section id="mode-cheat" class="hidden space-y-6 max-w-4xl mx-auto">
+            <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-6 pixel-card space-y-6">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-indigo-400 font-semibold">Revision Guide</span>
+                    <h2 class="text-xl font-bold text-white mt-0.5"><i class="fa-solid fa-book-open text-amber-400 mr-2"></i>IGCSE Data Representation Cheat Sheet</h2>
+                    <p class="text-sm text-slate-400 mt-1">Understand the crucial difference between Decimal (Base 10) vs Binary (Base 2) units and file size math.</p>
+                </div>
+
+                <!-- Decimal vs Binary Comparison Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Decimal Prefixes (Storage Manufacturers) -->
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center space-x-2 text-indigo-400 font-bold">
+                            <i class="fa-solid fa-hard-drive"></i>
+                            <h3>Decimal Units (Base 10)</h3>
+                        </div>
+                        <p class="text-xs text-slate-400">Used by manufacturers for hard drives, flash drives, and general speeds. Powers of 1000 ($10^3$).</p>
+                        <div class="space-y-2 font-mono text-xs bg-slate-800/60 p-3 rounded-lg border border-slate-700/60">
+                            <div class="flex justify-between"><span>1 Kilobyte (KB)</span> <span class="text-indigo-300">1,000 bytes</span></div>
+                            <div class="flex justify-between"><span>1 Megabyte (MB)</span> <span class="text-indigo-300">1,000 KB (10⁶ bytes)</span></div>
+                            <div class="flex justify-between"><span>1 Gigabyte (GB)</span> <span class="text-indigo-300">1,000 MB (10⁹ bytes)</span></div>
+                            <div class="flex justify-between"><span>1 Terabyte (TB)</span> <span class="text-indigo-300">1,000 GB (10¹² bytes)</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Binary Prefixes (Operating Systems / IGCSE Exact) -->
+                    <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center space-x-2 text-purple-400 font-bold">
+                            <i class="fa-solid fa-microchip"></i>
+                            <h3>Binary Prefixes / IEC (Base 2)</h3>
+                        </div>
+                        <p class="text-xs text-slate-400">Used in computer memory (RAM) and precise IGCSE data storage calculations. Powers of 1024 ($2^{10}$).</p>
+                        <div class="space-y-2 font-mono text-xs bg-slate-800/60 p-3 rounded-lg border border-slate-700/60">
+                            <div class="flex justify-between"><span>1 Kibibyte (KiB)</span> <span class="text-purple-300">1,024 bytes ($2^{10}$)</span></div>
+                            <div class="flex justify-between"><span>1 Mebibyte (MiB)</span> <span class="text-purple-300">1,024 KiB ($2^{20}$)</span></div>
+                            <div class="flex justify-between"><span>1 Gibibyte (GiB)</span> <span class="text-purple-300">1,024 MiB ($2^{30}$)</span></div>
+                            <div class="flex justify-between"><span>1 Tebibyte (TiB)</span> <span class="text-purple-300">1,024 GiB ($2^{40}$)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Conversion Formulas Box -->
+                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-5 space-y-3">
+                    <h3 class="text-sm font-bold text-slate-200"><i class="fa-solid fa-calculator text-emerald-400 mr-2"></i>Essential IGCSE Formulas</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                        <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60">
+                            <span class="text-emerald-400 font-bold block mb-1">Bits to Bytes:</span>
+                            <span>Divide by 8 (<span class="text-slate-300">8 bits = 1 byte</span>)</span>
+                        </div>
+                        <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60">
+                            <span class="text-emerald-400 font-bold block mb-1">Bytes to Bits:</span>
+                            <span>Multiply by 8</span>
+                        </div>
+                        <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60">
+                            <span class="text-emerald-400 font-bold block mb-1">Image File Size:</span>
+                            <span>$\text{Width} \times \text{Height} \times \text{Colour Depth (bits)} \div 8$</span>
+                        </div>
+                        <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/60">
+                            <span class="text-emerald-400 font-bold block mb-1">Storage Capacity Fit:</span>
+                            <span>$\text{Total Memory Size (bytes)} \div \text{File Size (bytes)}$</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800/40 border-t border-slate-800 py-4 px-4 text-center text-xs text-slate-500">
+        <p>ByteQuest • Built for IGCSE Computer Science Students & Teachers • GitHub Pages Ready</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global State
+        let globalStreak = 0;
+        let globalScore = 0;
+
+        // Mode Switching
+        function switchMode(mode) {
+            document.getElementById('mode-arcade').classList.add('hidden');
+            document.getElementById('mode-photo').classList.add('hidden');
+            document.getElementById('mode-cheat').classList.add('hidden');
+
+            document.getElementById('nav-arcade').className = "px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white";
+            document.getElementById('nav-photo').className = "px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white";
+            document.getElementById('nav-cheat').className = "px-3 py-1.5 rounded-lg transition-all text-slate-400 hover:text-white";
+
+            if (mode === 'arcade') {
+                document.getElementById('mode-arcade').classList.remove('hidden');
+                document.getElementById('nav-arcade').className = "px-3 py-1.5 rounded-lg transition-all bg-indigo-600 text-white shadow";
+                startArcadeMode();
+            } else if (mode === 'photo') {
+                document.getElementById('mode-photo').classList.remove('hidden');
+                document.getElementById('nav-photo').className = "px-3 py-1.5 rounded-lg transition-all bg-indigo-600 text-white shadow";
+                initPhotoLab();
+            } else if (mode === 'cheat') {
+                document.getElementById('mode-cheat').classList.remove('hidden');
+                document.getElementById('nav-cheat').className = "px-3 py-1.5 rounded-lg transition-all bg-indigo-600 text-white shadow";
+            }
+        }
+
+        // ==================== ARCADE MODE LOGIC ====================
+        let arcadeQuestions = [];
+        let currentArcadeIndex = 0;
+        let arcadeCorrectCount = 0;
+        let currentArcadeQuestionObj = null;
+
+        function generateArcadeBank() {
+            return [
+                {
+                    cat: "Bits & Bytes",
+                    diff: "Level 1: Fundamentals",
+                    q: "How many bits are in a single Byte?",
+                    type: "choice",
+                    options: ["4 bits", "8 bits", "1024 bits", "16 bits"],
+                    answer: "8 bits",
+                    explanation: "1 Byte is strictly composed of 8 bits in computer architecture."
+                },
+                {
+                    cat: "Unit Conversion",
+                    diff: "Level 1: Kilobytes",
+                    q: "In IGCSE standard decimal storage, how many bytes are in 1 Kilobyte (KB)?",
+                    type: "choice",
+                    options: ["1,000 bytes", "1,024 bytes", "512 bytes", "8,000 bytes"],
+                    answer: "1,000 bytes",
+                    explanation: "Decimal Kilobyte (KB) equals exactly 1,000 bytes ($10^3$). Binary is 1,024 (KiB)."
+                },
+                {
+                    cat: "Binary Prefixes (IEC)",
+                    diff: "Level 2: Kibibytes",
+                    q: "Which prefix represents exactly 1,024 bytes ($2^{10}$)?",
+                    type: "choice",
+                    options: ["Kilobyte (KB)", "Kibibyte (KiB)", "Megabyte (MB)", "Kilobit (Kb)"],
+                    answer: "Kibibyte (KiB)",
+                    explanation: "Kibibyte (KiB) is the IEC binary prefix representing 1,024 bytes."
+                },
+                {
+                    cat: "Image File Size",
+                    diff: "Level 2: Image Calculation",
+                    q: "An image is 100 × 100 pixels with a colour depth of 24 bits. What is the uncompressed file size in bytes?",
+                    type: "choice",
+                    options: ["24,000 bytes", "30,000 bytes", "192,000 bytes", "3,000 bytes"],
+                    answer: "30,000 bytes",
+                    explanation: "Calculation: $100 \\times 100 = 10,000$ pixels. $10,000 \\times 24 \\text{ bits} = 240,000 \\text{ bits}$. Divide by 8 = $30,000$ bytes."
+                },
+                {
+                    cat: "Speed vs Storage",
+                    diff: "Level 1: Bits and Bytes",
+                    q: "Internet download speeds are usually measured in Megabits per second (Mbps), while file sizes are in Megabytes (MB). If a file is 40 Megabits, how many Megabytes is that?",
+                    type: "choice",
+                    options: ["40 MB", "320 MB", "5 MB", "8 MB"],
+                    answer: "5 MB",
+                    explanation: "Since 1 Byte = 8 bits, divide Megabits by 8 to get Megabytes: $40 \\div 8 = 5\\text{ MB}$."
+                },
+                {
+                    cat: "Capacity Scaling",
+                    diff: "Level 3: GiB vs GB",
+                    q: "How many bytes are in 1 Gibibyte (GiB)?",
+                    type: "choice",
+                    options: ["1,000,000,000 bytes", "$1024 \\times 1024 \\times 1024$ bytes", "$1000 \\times 1000 \\times 1000$ bytes", "$64 \\times 1024$ bytes"],
+                    answer: "$1024 \\times 1024 \\times 1024$ bytes",
+                    explanation: "1 GiB = $1024 \\times 1024 \\times 1024 = 1,073,741,824$ bytes ($2^{30}$)."
+                },
+                {
+                    cat: "Audio File Size",
+                    diff: "Level 2: Sound Math",
+                    q: "A sound file has a sample rate of 10 kHz, 16-bit resolution, and runs for 10 seconds (mono). What is the file size in bytes?",
+                    type: "choice",
+                    options: ["200,000 bytes", "20,000 bytes", "1,600,000 bytes", "160,000 bytes"],
+                    answer: "200,000 bytes",
+                    explanation: "Sample rate ($10,000\\text{ Hz}$) $\\times$ Resolution ($16\\text{ bits}$) $\\times$ Time ($10\\text{ s}$) = $1,600,000\\text{ bits}$. Divide by 8 = $200,000$ bytes."
+                },
+                {
+                    cat: "Ascii Text",
+                    diff: "Level 1: Text Representation",
+                    q: "A text string contains 50 characters, and each character uses standard 8-bit ASCII. What is the file size in bytes?",
+                    type: "choice",
+                    options: ["400 bytes", "50 bytes", "400 bits", "800 bytes"],
+                    answer: "50 bytes",
+                    explanation: "Each ASCII character takes 1 byte (8 bits). $50 \\times 1 = 50$ bytes."
+                },
+                {
+                    cat: "Order of Magnitude",
+                    diff: "Level 2: Unit Ordering",
+                    q: "Which of the following orders of data units is correctly arranged from SMALLEST to LARGEST?",
+                    type: "choice",
+                    options: [
+                        "Byte < Kilobyte < Megabyte < Gigabyte",
+                        "Megabyte < Kilobyte < Gigabyte < Byte",
+                        "Byte < Megabyte < Kilobyte < Gigabyte",
+                        "Gigabyte < Megabyte < Kilobyte < Byte"
+                    ],
+                    answer: "Byte < Kilobyte < Megabyte < Gigabyte",
+                    explanation: "Bytes are smallest, followed by KB, MB, GB, and TB."
+                },
+                {
+                    cat: "Exam Challenge",
+                    diff: "Level 3: Memory Stick Fit",
+                    q: "If a single video file is 500 MiB, approximately how many complete video files fit on a 4 GiB memory stick? (Hint: 1 GiB = 1024 MiB)",
+                    type: "choice",
+                    options: ["8 files", "10 files", "7 files", "5 files"],
+                    answer: "8 files",
+                    explanation: "4 GiB = $4 \\times 1024 = 4096\\text{ MiB}$. $4096 \\div 500 = 8.192$. Rounding down gives 8 files."
+                }
+            ];
+        }
+
+        function startArcadeMode() {
+            arcadeQuestions = generateArcadeBank();
+            // Shuffle
+            arcadeQuestions.sort(() => Math.random() - 0.5);
+            currentArcadeIndex = 0;
+            arcadeCorrectCount = 0;
+            document.getElementById('arcade-complete-card').classList.add('hidden');
+            document.querySelector('#mode-arcade > div:first-child').classList.remove('hidden');
+            loadArcadeQuestion();
+        }
+
+        function loadArcadeQuestion() {
+            if (currentArcadeIndex >= arcadeQuestions.length) {
+                endArcadeMode();
+                return;
+            }
+
+            currentArcadeQuestionObj = arcadeQuestions[currentArcadeIndex];
+            document.getElementById('arcade-qnum').textContent = currentArcadeIndex + 1;
+            document.getElementById('arcade-difficulty').textContent = currentArcadeQuestionObj.diff;
+            document.getElementById('arcade-prompt-category').textContent = currentArcadeQuestionObj.cat;
+            document.getElementById('arcade-question-text').textContent = currentArcadeQuestionObj.q;
+
+            document.getElementById('arcade-feedback-box').classList.add('hidden');
+            document.getElementById('arcade-next-btn').classList.add('hidden');
+
+            const optionsContainer = document.getElementById('arcade-options-container');
+            optionsContainer.innerHTML = '';
+            optionsContainer.classList.remove('hidden');
+
+            // Shuffle options
+            let shuffledOpts = [...currentArcadeQuestionObj.options].sort(() => Math.random() - 0.5);
+
+            shuffledOpts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-slate-900/80 hover:bg-slate-700/80 border border-slate-700 hover:border-indigo-500/60 p-4 rounded-xl text-sm font-medium text-slate-200 transition-all shadow-sm";
+                btn.textContent = opt;
+                btn.onclick = () => selectArcadeAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectArcadeAnswer(selected, btnElem) {
+            const isCorrect = selected === currentArcadeQuestionObj.answer;
+            const allBtns = document.querySelectorAll('#arcade-options-container button');
+            
+            allBtns.forEach(b => {
+                b.disabled = true;
+                if (b.textContent === currentArcadeQuestionObj.answer) {
+                    b.classList.remove('bg-slate-900/80', 'border-slate-700');
+                    b.classList.add('bg-emerald-600/30', 'border-emerald-500', 'text-emerald-200');
+                } else if (b === btnElem && !isCorrect) {
+                    b.classList.remove('bg-slate-900/80', 'border-slate-700');
+                    b.classList.add('bg-rose-600/30', 'border-rose-500', 'text-rose-200');
+                }
+            });
+
+            const feedbackBox = document.getElementById('arcade-feedback-box');
+            const feedbackIcon = document.getElementById('arcade-feedback-icon');
+            const feedbackTitle = document.getElementById('arcade-feedback-title');
+            const feedbackText = document.getElementById('arcade-feedback-text');
+
+            feedbackBox.classList.remove('hidden');
+            if (isCorrect) {
+                arcadeCorrectCount++;
+                globalScore += 100;
+                globalStreak++;
+                feedbackBox.className = "p-4 rounded-xl border bg-emerald-950/40 border-emerald-500/40 text-emerald-200 mb-4";
+                feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+                feedbackTitle.textContent = "Correct! Excellent work.";
+            } else {
+                globalStreak = 0;
+                feedbackBox.className = "p-4 rounded-xl border bg-rose-950/40 border-rose-500/40 text-rose-200 mb-4";
+                feedbackIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+                feedbackTitle.textContent = "Incorrect.";
+            }
+            feedbackText.textContent = currentArcadeQuestionObj.explanation;
+
+            updateGlobalStats();
+            document.getElementById('arcade-next-btn').classList.remove('hidden');
+        }
+
+        function nextArcadeQuestion() {
+            currentArcadeIndex++;
+            loadArcadeQuestion();
+        }
+
+        function endArcadeMode() {
+            document.querySelector('#mode-arcade > div:first-child').classList.add('hidden');
+            const completeCard = document.getElementById('arcade-complete-card');
+            completeCard.classList.remove('hidden');
+            document.getElementById('arcade-final-score-text').textContent = `You scored ${arcadeCorrectCount} out of ${arcadeQuestions.length} correct! (${Math.round((arcadeCorrectCount/arcadeQuestions.length)*100)}%)`;
+        }
+
+        function updateGlobalStats() {
+            document.getElementById('global-streak').textContent = globalStreak;
+            document.getElementById('global-score').textContent = globalScore;
+        }
+
+
+        // ==================== PHOTO & STORAGE LAB LOGIC ====================
+        let photoData = {
+            width: 1024,
+            height: 1080,
+            depth: 32,
+            stickSize: 64,
+            stickUnit: 'GiB',
+            multiplier: 1024 * 1024 * 1024,
+            totalPixels: 0,
+            fileSizeBits: 0,
+            fileSizeBytes: 0,
+            stickBytes: 0,
+            finalPhotos: 0
+        };
+
+        function initPhotoLab() {
+            generateNewPhotoProblem();
+        }
+
+        function generateNewPhotoProblem() {
+            const widths = [800, 1024, 1280, 1920, 2048];
+            const heights = [600, 768, 1080, 1200, 1536];
+            const depths = [16, 24, 32];
+            const stickSizes = [16, 32, 64, 128];
+            const units = [
+                { name: 'GiB', mult: 1024 * 1024 * 1024 },
+                { name: 'GB', mult: 1000 * 1000 * 1000 }
+            ];
+
+            photoData.width = widths[Math.floor(Math.random() * widths.length)];
+            photoData.height = heights[Math.floor(Math.random() * heights.length)];
+            photoData.depth = depths[Math.floor(Math.random() * depths.length)];
+            photoData.stickSize = stickSizes[Math.floor(Math.random() * stickSizes.length)];
+            const chosenUnit = units[Math.floor(Math.random() * units.length)];
+            photoData.stickUnit = chosenUnit.name;
+            photoData.multiplier = chosenUnit.mult;
+
+            // Calculations
+            photoData.totalPixels = photoData.width * photoData.height;
+            photoData.fileSizeBits = photoData.totalPixels * photoData.depth;
+            photoData.fileSizeBytes = Math.round(photoData.fileSizeBits / 8);
+            photoData.stickBytes = photoData.stickSize * photoData.multiplier;
+            photoData.finalPhotos = Math.floor(photoData.stickBytes / photoData.fileSizeBytes);
+
+            // Update UI text
+            document.getElementById('p-width').textContent = photoData.width.toLocaleString();
+            document.getElementById('p-height').textContent = photoData.height.toLocaleString();
+            document.getElementById('p-depth').textContent = photoData.depth;
+            document.getElementById('p-stick').textContent = `${photoData.stickSize} ${photoData.stickUnit}`;
+            document.getElementById('stick-unit-label').textContent = `${photoData.stickSize} ${photoData.stickUnit}`;
+
+            // Reset inputs & feedback
+            ['1', '2', '3', '4'].forEach(step => {
+                document.getElementById(`step${step}-input`).value = '';
+                document.getElementById(`step${step}-input`).disabled = false;
+                const fb = document.getElementById(`step${step}-feedback`);
+                fb.classList.add('hidden');
+                fb.textContent = '';
+            });
+
+            document.getElementById('photo-success-badge').classList.add('hidden');
+            document.getElementById('photo-worked-solution').classList.add('hidden');
+        }
+
+        function checkStep(stepNum) {
+            const inputElem = document.getElementById(`step${stepNum}-input`);
+            const feedbackElem = document.getElementById(`step${stepNum}-feedback`);
+            const val = parseInt(inputElem.value.replace(/,/g, ''));
+
+            let targetVal = 0;
+            if (stepNum === 1) targetVal = photoData.totalPixels;
+            else if (stepNum === 2) targetVal = photoData.fileSizeBytes;
+            else if (stepNum === 3) targetVal = photoData.stickBytes;
+            else if (stepNum === 4) targetVal = photoData.finalPhotos;
+
+            feedbackElem.classList.remove('hidden');
+
+            if (isNaN(val)) {
+                feedbackElem.className = "text-xs mt-2 text-rose-400";
+                feedbackElem.textContent = "Please enter a valid number.";
+                return;
+            }
+
+            // Allow small tolerance or exact match
+            if (val === targetVal) {
+                feedbackElem.className = "text-xs mt-2 text-emerald-400 font-semibold";
+                feedbackElem.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Correct!';
+                inputElem.disabled = true;
+                globalScore += 50;
+                updateGlobalStats();
+                checkAllStepsCompleted();
+            } else {
+                feedbackElem.className = "text-xs mt-2 text-rose-400 font-semibold";
+                feedbackElem.innerHTML = `<i class="fa-solid xmark mr-1"></i> Incorrect. Check your calculation formula. (Expected approx: ${targetVal.toLocaleString()})`;
+            }
+        }
+
+        function checkAllStepsCompleted() {
+            let allDone = true;
+            for (let i = 1; i <= 4; i++) {
+                const inp = document.getElementById(`step${i}-input`);
+                if (!inp.disabled) allDone = false;
+            }
+            if (allDone) {
+                document.getElementById('photo-success-badge').classList.remove('hidden');
+            }
+        }
+
+        function revealPhotoSolution() {
+            const solPanel = document.getElementById('photo-worked-solution');
+            solPanel.classList.toggle('hidden');
+
+            const contentDiv = document.getElementById('photo-solution-steps-content');
+            contentDiv.innerHTML = `
+                <p><strong>Step 1 (Total Pixels):</strong> ${photoData.width.toLocaleString()} × ${photoData.height.toLocaleString()} = <strong>${photoData.totalPixels.toLocaleString()} pixels</strong></p>
+                <p><strong>Step 2 (File Size in Bytes):</strong> ${photoData.totalPixels.toLocaleString()} pixels × ${photoData.depth} bits = ${photoData.fileSizeBits.toLocaleString()} bits. ÷ 8 = <strong>${photoData.fileSizeBytes.toLocaleString()} bytes</strong></p>
+                <p><strong>Step 3 (Memory Stick Capacity in Bytes):</strong> ${photoData.stickSize} ${photoData.stickUnit} = ${photoData.stickSize} × ${photoData.multiplier.toLocaleString()} = <strong>${photoData.stickBytes.toLocaleString()} bytes</strong></p>
+                <p><strong>Step 4 (Final Photo Count):</strong> ${photoData.stickBytes.toLocaleString()} bytes ÷ ${photoData.fileSizeBytes.toLocaleString()} bytes = <strong>${photoData.finalPhotos.toLocaleString()} photographs</strong> (rounded down)</p>
+            `;
+        }
+
+        // Initialize default view on load
+        window.onload = function() {
+            startArcadeMode();
+        };
+    </script>
+</body>
+</html>
